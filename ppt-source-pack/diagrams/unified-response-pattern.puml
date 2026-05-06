@@ -1,0 +1,31 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam ArrowColor #334155
+
+title 统一响应与异常处理模式图
+
+participant "Vue 页面" as View
+participant "request.ts\nAxios Instance" as Request
+participant "Controller" as Controller
+participant "Service" as Service
+participant "GlobalExceptionHandler" as Handler
+participant "ApiResponse" as Response
+
+View -> Request : 发起请求
+Request -> Controller : /api/v1/**
+Controller -> Service : 处理业务
+
+alt 正常返回
+  Service --> Controller : 业务结果
+  Controller -> Response : ApiResponse.ok(data)
+  Response --> Request : { code, message, data, timestamp }
+  Request --> View : res.data
+else 业务异常 / 权限异常 / 校验异常
+  Service --> Handler : throw Exception
+  Handler -> Response : ApiResponse.of(...)
+  Response --> Request : 非 0 code
+  Request --> View : 弹出错误信息 / 401 时回到登录页
+end
+
+@enduml

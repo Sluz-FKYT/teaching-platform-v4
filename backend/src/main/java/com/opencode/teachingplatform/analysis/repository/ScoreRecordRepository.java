@@ -1,0 +1,13 @@
+package com.opencode.teachingplatform.analysis.repository;
+
+import com.opencode.teachingplatform.analysis.entity.ScoreRecord;
+import com.opencode.teachingplatform.common.enums.BusinessType;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> {
+    List<ScoreRecord> findByStudentId(Long studentId);
+    Optional<ScoreRecord> findByBusinessTypeAndBusinessIdAndStudentId(BusinessType businessType, Long businessId, Long studentId);
+}

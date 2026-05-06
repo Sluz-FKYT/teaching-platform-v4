@@ -1,0 +1,12 @@
+CREATE TABLE user_login_session (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  session_key VARCHAR(64) NOT NULL UNIQUE,
+  status VARCHAR(16) NOT NULL,
+  last_seen_at TIMESTAMP NULL,
+  invalidated_at TIMESTAMP NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_user_login_session_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
+);

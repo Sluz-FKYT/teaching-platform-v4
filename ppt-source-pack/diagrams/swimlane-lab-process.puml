@@ -1,0 +1,51 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #f8fafc
+  BorderColor #475569
+  ArrowColor #334155
+}
+
+title 实验闭环泳道图
+
+|教师|
+start
+:创建实验;
+:配置实验步骤;
+:发布实验;
+
+|学生|
+:进入实验列表;
+:查看实验详情与步骤;
+
+|系统|
+:返回实验详情与已有提交状态;
+
+|学生|
+:逐步填写答案;
+:保存步骤答案;
+
+|系统|
+:写入 lab_submission / lab_step_answer;
+
+|学生|
+:正式提交实验;
+
+|系统|
+:更新提交状态为 SUBMITTED;
+:执行自动评分或生成建议评分;
+
+|教师|
+:查看实验报告列表;
+:打开实验报告详情;
+:给出教师评分与评语;
+
+|系统|
+:更新实验报告为 GRADED;
+:写入 score_record;
+
+|学生|
+:查看实验反馈与成绩;
+stop
+@enduml

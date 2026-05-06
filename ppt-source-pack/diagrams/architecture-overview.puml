@@ -1,0 +1,68 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam packageBorderColor #64748b
+skinparam packageBackgroundColor #f8fafc
+
+title 教学平台总体架构图
+
+package "展示与交互层" {
+  component "教师端页面\nVue 3 + Vite" as TeacherUI
+  component "学生端页面\nVue 3 + Vite" as StudentUI
+  component "公共认证与资料页\n登录 / Profile" as SharedUI
+  component "前端基础能力\nPinia / Vue Router / Axios" as FrontBase
+}
+
+package "后端应用层" {
+  component "认证与权限\nauth" as Auth
+  component "班级与学生\nclazz + student" as Clazz
+  component "资料与题库\nmaterial + question" as Assets
+  component "实验闭环\nlab" as Lab
+  component "作业闭环\nhomework" as Homework
+  component "考试闭环\nexam" as Exam
+  component "统计分析\nanalysis" as Analysis
+  component "查重能力\nplagiarism" as Plagiarism
+  component "统一响应 / 异常 / 审计\ncommon" as Common
+}
+
+database "数据库\nFlyway Migration 管理" as DB
+collections "设计解释层\ndesign/" as DesignPack
+
+TeacherUI --> FrontBase
+StudentUI --> FrontBase
+SharedUI --> FrontBase
+
+FrontBase --> Auth
+FrontBase --> Clazz
+FrontBase --> Assets
+FrontBase --> Lab
+FrontBase --> Homework
+FrontBase --> Exam
+FrontBase --> Analysis
+FrontBase --> Plagiarism
+
+Auth --> DB
+Clazz --> DB
+Assets --> DB
+Lab --> DB
+Homework --> DB
+Exam --> DB
+Analysis --> DB
+Plagiarism --> DB
+Common --> DB
+
+DesignPack ..> TeacherUI : 页面契约 / 原型锚点
+DesignPack ..> StudentUI : 页面契约 / 原型锚点
+DesignPack ..> SharedUI : 页面契约 / 原型锚点
+
+note right of DB
+数据库事实以
+backend/src/main/resources/db/migration/
+为准
+end note
+
+@enduml

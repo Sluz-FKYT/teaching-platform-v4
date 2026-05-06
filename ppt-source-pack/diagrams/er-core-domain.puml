@@ -1,0 +1,207 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+hide circle
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #f8fafc
+  BorderColor #475569
+}
+
+title 教学平台核心 ER 图
+
+entity "sys_user" as sys_user {
+  * id : BIGINT
+  --
+  username : VARCHAR(64)
+  role : VARCHAR(16)
+  display_name : VARCHAR(128)
+  status : VARCHAR(16)
+}
+
+entity "class_room" as class_room {
+  * id : BIGINT
+  --
+  name : VARCHAR(128)
+  code : VARCHAR(64)
+  teacher_user_id : BIGINT
+}
+
+entity "class_member" as class_member {
+  * id : BIGINT
+  --
+  class_id : BIGINT
+  student_user_id : BIGINT
+}
+
+entity "course_material" as course_material {
+  * id : BIGINT
+  --
+  title : VARCHAR(128)
+  category : VARCHAR(64)
+  uploader_user_id : BIGINT
+}
+
+entity "question_bank" as question_bank {
+  * id : BIGINT
+  --
+  code : VARCHAR(64)
+  type : VARCHAR(32)
+  created_by : BIGINT
+}
+
+entity "lab" as lab {
+  * id : BIGINT
+  --
+  class_id : BIGINT
+  material_id : BIGINT
+  created_by : BIGINT
+}
+
+entity "lab_step" as lab_step {
+  * id : BIGINT
+  --
+  lab_id : BIGINT
+  step_no : INT
+}
+
+entity "lab_submission" as lab_submission {
+  * id : BIGINT
+  --
+  lab_id : BIGINT
+  student_id : BIGINT
+  submit_status : VARCHAR(16)
+}
+
+entity "lab_step_answer" as lab_step_answer {
+  * id : BIGINT
+  --
+  lab_submission_id : BIGINT
+  lab_step_id : BIGINT
+  score : DOUBLE
+}
+
+entity "homework" as homework {
+  * id : BIGINT
+  --
+  class_id : BIGINT
+  created_by : BIGINT
+  status : VARCHAR(16)
+}
+
+entity "homework_question" as homework_question {
+  * id : BIGINT
+  --
+  homework_id : BIGINT
+  question_id : BIGINT
+}
+
+entity "homework_submission" as homework_submission {
+  * id : BIGINT
+  --
+  homework_id : BIGINT
+  student_id : BIGINT
+  submit_status : VARCHAR(16)
+}
+
+entity "homework_answer" as homework_answer {
+  * id : BIGINT
+  --
+  homework_submission_id : BIGINT
+  question_id : BIGINT
+}
+
+entity "exam" as exam {
+  * id : BIGINT
+  --
+  class_id : BIGINT
+  created_by : BIGINT
+  status : VARCHAR(16)
+}
+
+entity "exam_question" as exam_question {
+  * id : BIGINT
+  --
+  exam_id : BIGINT
+  question_id : BIGINT
+}
+
+entity "exam_submission" as exam_submission {
+  * id : BIGINT
+  --
+  exam_id : BIGINT
+  student_id : BIGINT
+  status : VARCHAR(16)
+}
+
+entity "exam_answer" as exam_answer {
+  * id : BIGINT
+  --
+  exam_submission_id : BIGINT
+  question_id : BIGINT
+}
+
+entity "plagiarism_task" as plagiarism_task {
+  * id : BIGINT
+  --
+  business_type : VARCHAR(16)
+  business_id : BIGINT
+  student_id : BIGINT
+}
+
+entity "score_record" as score_record {
+  * id : BIGINT
+  --
+  business_type : VARCHAR(16)
+  business_id : BIGINT
+  student_id : BIGINT
+  class_id : BIGINT
+}
+
+entity "audit_log" as audit_log {
+  * id : BIGINT
+  --
+  user_id : BIGINT
+  action : VARCHAR(64)
+}
+
+sys_user ||--o{ class_room : 教师负责
+sys_user ||--o{ class_member : 学生加入
+class_room ||--o{ class_member : 班级成员
+
+sys_user ||--o{ course_material : 上传
+sys_user ||--o{ question_bank : 创建
+
+class_room ||--o{ lab : 开设实验
+course_material ||--o{ lab : 附属资料
+sys_user ||--o{ lab : 创建
+lab ||--o{ lab_step : 包含步骤
+lab ||--o{ lab_submission : 学生提交
+sys_user ||--o{ lab_submission : 学生
+lab_submission ||--o{ lab_step_answer : 包含答案
+lab_step ||--o{ lab_step_answer : 被回答
+
+class_room ||--o{ homework : 布置作业
+sys_user ||--o{ homework : 创建
+homework ||--o{ homework_question : 关联试题
+question_bank ||--o{ homework_question : 被引用
+homework ||--o{ homework_submission : 学生提交
+sys_user ||--o{ homework_submission : 学生
+homework_submission ||--o{ homework_answer : 包含答案
+question_bank ||--o{ homework_answer : 被回答
+
+class_room ||--o{ exam : 开设考试
+sys_user ||--o{ exam : 创建
+exam ||--o{ exam_question : 配置试题
+question_bank ||--o{ exam_question : 被引用
+exam ||--o{ exam_submission : 学生提交
+sys_user ||--o{ exam_submission : 学生
+exam_submission ||--o{ exam_answer : 包含答案
+question_bank ||--o{ exam_answer : 被回答
+
+sys_user ||--o{ plagiarism_task : 查重对象
+sys_user ||--o{ score_record : 成绩所属学生
+class_room ||--o{ score_record : 班级成绩
+sys_user ||--o{ audit_log : 操作日志
+
+@enduml

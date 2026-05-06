@@ -1,0 +1,33 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor #f8fafc
+  BorderColor #475569
+}
+
+title 分层架构与职责分离示意图
+
+rectangle "表示层\nVue 页面 / 路由 / Pinia" as Presentation
+rectangle "接口层\nController" as Controller
+rectangle "业务层\nService" as Service
+rectangle "持久层\nRepository" as Repository
+rectangle "领域对象\nEntity / DTO" as Domain
+rectangle "数据库\nMigration + Tables" as Database
+
+Presentation --> Controller : HTTP / JSON
+Controller --> Service : 当前用户 + 业务请求
+Service --> Repository : 查询 / 保存
+Repository --> Domain : 映射实体
+Repository --> Database : 持久化
+Service --> Domain : 组装结果
+Controller --> Presentation : ApiResponse
+
+note right of Service
+典型模式：
+- 控制器只取当前用户并转发
+- 业务规则集中在 Service
+- 统一响应与异常由 common 层收口
+end note
+
+@enduml

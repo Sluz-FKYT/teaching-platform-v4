@@ -1,0 +1,140 @@
+package com.opencode.teachingplatform.homework;
+
+import com.opencode.teachingplatform.auth.security.CurrentUser;
+import com.opencode.teachingplatform.common.enums.ActivityStatus;
+import com.opencode.teachingplatform.common.enums.UserRole;
+import com.opencode.teachingplatform.homework.dto.HomeworkRequests;
+import com.opencode.teachingplatform.homework.entity.Homework;
+import com.opencode.teachingplatform.homework.entity.HomeworkAnswer;
+import com.opencode.teachingplatform.homework.entity.HomeworkQuestion;
+import com.opencode.teachingplatform.homework.repository.HomeworkAnswerRepository;
+import com.opencode.teachingplatform.homework.repository.HomeworkQuestionRepository;
+import com.opencode.teachingplatform.homework.repository.HomeworkRepository;
+import com.opencode.teachingplatform.homework.service.HomeworkService;
+import com.opencode.teachingplatform.question.entity.QuestionBank;
+import com.opencode.teachingplatform.question.repository.QuestionBankRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
+class HomeworkQuestionFlowTests {
+
+    private static final CurrentUser TEACHER = new CurrentUser(1L, "t9001", "张老师", UserRole.TEACHER);
+    private static final CurrentUser STUDENT = new CurrentUser(2L, "20260001", "李学生", UserRole.STUDENT);
+
+    @Autowired
+    private HomeworkService homeworkService;
+
+    @Autowired
+    private HomeworkRepository homeworkRepository;
+
+    @Autowired
+    private HomeworkQuestionRepository homeworkQuestionRepository;
+
+    @Autowired
+    private HomeworkAnswerRepository homeworkAnswerRepository;
+
+    @Autowired
+    private QuestionBankRepository questionBankRepository;
+
+    @Test
+    void teacherShouldBeAbleToAttachQuestionBankQuestionsAndInlineQuestions() {
+        Homework homework = savePublishedHomework();
+        QuestionBank bankQuestion = saveBankQuestion();
+
+        homeworkService.addQuestionFromBank(TEACHER, homework.getId(),
+                new HomeworkRequests.AddHomeworkQuestionFromBankRequest(bankQuestion.getId(), 1, 10D));
+
+        homeworkService.addInlineQuestion(TEACHER, homework.getId(),
+                new HomeworkRequests.AddInlineHomeworkQuestionRequest(
+                        "SUBJECTIVE",
+                        "请说明策略模式的价值",
+                        15D,
+                        "{\"keywords\":[{\"term\":\"strategy\",\"weight\":8}],\"minLength\":6}",
+                        false,
+                        2
+                ));
+
+        List<HomeworkQuestion> questions = homeworkQuestionRepository.findByHomeworkIdOrderBySortOrder(homework.getId());
+
+        assertThat(questions).hasSize(2);
+        assertThat(questions.get(0).getQuestionId()).isEqualTo(bankQuestion.getId());
+        assertThat(questions.get(1).getQuestionId()).isNull();
+        assertThat(questions.get(1).getQuestionSnapshotJson()).contains("策略模式的价值");
+    }
+
+    @Test
+    void studentSubmissionShouldCreatePerQuestionAnswersAndRecommendationScores() {
+        Homework homework = savePublishedHomework();
+        QuestionBank bankQuestion = saveBankQuestion();
+
+        Map<String, Object> objectiveQuestion = homeworkService.addQuestionFromBank(TEACHER, homework.getId(),
+                new HomeworkRequests.AddHomeworkQuestionFromBankRequest(bankQuestion.getId(), 1, 10D));
+
+        Map<String, Object> subjectiveQuestion = homeworkService.addInlineQuestion(TEACHER, homework.getId(),
+                new HomeworkRequests.AddInlineHomeworkQuestionRequest(
+                        "SUBJECTIVE",
+                        "请说明 strategy 扩展与复用能力",
+                        15D,
+                        "{\"keywords\":[{\"term\":\"strategy\",\"weight\":8},{\"term\":\"复用\",\"weight\":4}],\"minLength\":6}",
+                        false,
+                        2
+                ));
+
+        homeworkService.submitHomework(STUDENT, homework.getId(),
+                new HomeworkRequests.SubmitHomeworkRequest(
+                        List.of(
+                                new HomeworkRequests.SubmitHomeworkAnswerItem((Long) objectiveQuestion.get("id"), List.of("A"), null, null, null),
+                                new HomeworkRequests.SubmitHomeworkAnswerItem((Long) subjectiveQuestion.get("id"), null, "strategy 设计提升复用", null, null)
+                        )
+                ));
+
+        List<HomeworkAnswer> answers = homeworkAnswerRepository.findAll();
+
+        assertThat(answers).hasSize(2);
+        HomeworkAnswer objective = answers.stream().filter(item -> item.getAutoScore() != null).findFirst().orElseThrow();
+        HomeworkAnswer subjective = answers.stream().filter(item -> item.getSuggestedScore() != null).findFirst().orElseThrow();
+
+        assertThat(objective.getScore()).isEqualTo(10D);
+        assertThat(subjective.getSuggestedScore()).isEqualTo(12D);
+        assertThat(subjective.getScore()).isNull();
+        assertThat(subjective.getJudgeDetail()).contains("strategy");
+    }
+
+    private Homework savePublishedHomework() {
+        Homework homework = new Homework();
+        homework.setTitle("评分系统作业");
+        homework.setDescription("题目化作业");
+        homework.setClassId(1L);
+        homework.setCreatedBy(1L);
+        homework.setStatus(ActivityStatus.PUBLISHED);
+        homework.setStartAt(OffsetDateTime.now().minusHours(1));
+        homework.setDueAt(OffsetDateTime.now().plusDays(1));
+        return homeworkRepository.save(homework);
+    }
+
+    private QuestionBank saveBankQuestion() {
+        QuestionBank question = new QuestionBank();
+        question.setCode("QB-HW-001");
+        question.setType("SINGLE_CHOICE");
+        question.setStem("策略模式的核心目的是什么？");
+        question.setDifficulty("MEDIUM");
+        question.setDefaultScore(10);
+        question.setOptionsJson("[{\"label\":\"A\",\"content\":\"封装可替换算法\"}]");
+        question.setAnswerJson("{\"correctAnswer\":\"A\"}");
+        question.setScoringConfigJson("{\"correctAnswer\":\"A\"}");
+        question.setCreatedBy(1L);
+        return questionBankRepository.save(question);
+    }
+}

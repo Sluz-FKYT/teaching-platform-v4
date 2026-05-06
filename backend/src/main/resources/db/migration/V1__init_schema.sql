@@ -1,0 +1,259 @@
+CREATE TABLE sys_user (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(64) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(16) NOT NULL,
+  display_name VARCHAR(128) NOT NULL,
+  status VARCHAR(16) NOT NULL,
+  must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
+  last_login_at TIMESTAMP NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE class_room (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  code VARCHAR(64) NOT NULL UNIQUE,
+  teacher_user_id BIGINT NOT NULL,
+  status VARCHAR(16) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE class_member (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  class_id BIGINT NOT NULL,
+  student_user_id BIGINT NOT NULL,
+  joined_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT uk_class_student UNIQUE (class_id, student_user_id)
+);
+
+CREATE TABLE audit_log (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  action VARCHAR(64) NOT NULL,
+  resource_type VARCHAR(64) NOT NULL,
+  resource_id BIGINT NULL,
+  detail_json TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE course_material (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(128) NOT NULL,
+  category VARCHAR(64) NOT NULL,
+  description TEXT NULL,
+  file_path VARCHAR(255) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  uploader_user_id BIGINT NOT NULL,
+  visibility VARCHAR(16) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE question_bank (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(64) NOT NULL UNIQUE,
+  type VARCHAR(32) NOT NULL,
+  stem TEXT NOT NULL,
+  difficulty VARCHAR(32) NOT NULL,
+  default_score INT NOT NULL,
+  options_json TEXT NULL,
+  answer_json TEXT NULL,
+  analysis_text TEXT NULL,
+  created_by BIGINT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE lab (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(128) NOT NULL,
+  description TEXT NULL,
+  status VARCHAR(16) NOT NULL,
+  start_at TIMESTAMP NULL,
+  end_at TIMESTAMP NULL,
+  material_id BIGINT NULL,
+  class_id BIGINT NOT NULL,
+  created_by BIGINT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE lab_step (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  lab_id BIGINT NOT NULL,
+  step_no INT NOT NULL,
+  title VARCHAR(128) NOT NULL,
+  question_type VARCHAR(32) NOT NULL,
+  content TEXT NOT NULL,
+  answer_config_json TEXT NULL,
+  step_score INT NOT NULL,
+  allow_paste BOOLEAN NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT uk_lab_step_no UNIQUE (lab_id, step_no)
+);
+
+CREATE TABLE lab_submission (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  lab_id BIGINT NOT NULL,
+  student_id BIGINT NOT NULL,
+  submit_status VARCHAR(16) NOT NULL,
+  plagiarism_rate DOUBLE NULL,
+  total_score DOUBLE NULL,
+  teacher_comment TEXT NULL,
+  submitted_at TIMESTAMP NULL,
+  graded_at TIMESTAMP NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT uk_lab_submission UNIQUE (lab_id, student_id)
+);
+
+CREATE TABLE lab_step_answer (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  lab_submission_id BIGINT NOT NULL,
+  lab_step_id BIGINT NOT NULL,
+  answer_text TEXT NULL,
+  answer_file_path VARCHAR(255) NULL,
+  auto_score DOUBLE NULL,
+  suggested_score DOUBLE NULL,
+  score_source VARCHAR(16) NOT NULL DEFAULT 'TEACHER',
+  auto_judge_detail TEXT NULL,
+  score DOUBLE NULL,
+  teacher_comment TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT uk_lab_step_answer UNIQUE (lab_submission_id, lab_step_id)
+);
+
+CREATE TABLE homework (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(128) NOT NULL,
+  description TEXT NULL,
+  class_id BIGINT NOT NULL,
+  start_at TIMESTAMP NULL,
+  due_at TIMESTAMP NULL,
+  attachment_path VARCHAR(255) NULL,
+  created_by BIGINT NOT NULL,
+  status VARCHAR(16) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE homework_question (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  homework_id BIGINT NOT NULL,
+  question_id BIGINT NOT NULL,
+  sort_order INT NOT NULL,
+  question_score DOUBLE NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE homework_submission (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  homework_id BIGINT NOT NULL,
+  student_id BIGINT NOT NULL,
+  submit_status VARCHAR(16) NOT NULL,
+  answer_text TEXT NULL,
+  answer_file_path VARCHAR(255) NULL,
+  plagiarism_rate DOUBLE NULL,
+  total_score DOUBLE NULL,
+  teacher_comment TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT uk_homework_submission UNIQUE (homework_id, student_id)
+);
+
+CREATE TABLE homework_answer (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  homework_submission_id BIGINT NOT NULL,
+  question_id BIGINT NOT NULL,
+  answer_json TEXT NULL,
+  score DOUBLE NULL,
+  teacher_comment TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE exam (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(128) NOT NULL,
+  description TEXT NULL,
+  class_id BIGINT NOT NULL,
+  start_at TIMESTAMP NULL,
+  end_at TIMESTAMP NULL,
+  duration_minutes INT NOT NULL,
+  status VARCHAR(16) NOT NULL,
+  created_by BIGINT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE exam_question (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  exam_id BIGINT NOT NULL,
+  question_id BIGINT NOT NULL,
+  sort_order INT NOT NULL,
+  question_score DOUBLE NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE exam_submission (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  exam_id BIGINT NOT NULL,
+  student_id BIGINT NOT NULL,
+  started_at TIMESTAMP NULL,
+  submitted_at TIMESTAMP NULL,
+  deadline_at TIMESTAMP NULL,
+  auto_score DOUBLE NULL,
+  manual_score DOUBLE NULL,
+  total_score DOUBLE NULL,
+  status VARCHAR(16) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT uk_exam_submission UNIQUE (exam_id, student_id)
+);
+
+CREATE TABLE exam_answer (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  exam_submission_id BIGINT NOT NULL,
+  question_id BIGINT NOT NULL,
+  answer_json TEXT NULL,
+  is_correct BOOLEAN NULL,
+  score DOUBLE NULL,
+  teacher_comment TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE plagiarism_task (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  business_type VARCHAR(16) NOT NULL,
+  business_id BIGINT NOT NULL,
+  student_id BIGINT NOT NULL,
+  status VARCHAR(16) NOT NULL,
+  similarity_rate DOUBLE NULL,
+  top_match_summary VARCHAR(255) NULL,
+  raw_result_json TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE score_record (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  business_type VARCHAR(16) NOT NULL,
+  business_id BIGINT NOT NULL,
+  student_id BIGINT NOT NULL,
+  class_id BIGINT NOT NULL,
+  score DOUBLE NOT NULL,
+  graded_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,147 @@
+package com.opencode.teachingplatform.homework.dto;
+
+import com.opencode.teachingplatform.common.enums.ScoreVisibilityMode;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+public final class HomeworkRequests {
+
+    private HomeworkRequests() {
+    }
+
+    public record CreateHomeworkRequest(
+            @NotBlank String title,
+            String description,
+            @NotNull Long classId,
+            String status,
+            ScoreVisibilityMode scoreVisibilityMode,
+            String attachmentPath,
+            OffsetDateTime startAt,
+            OffsetDateTime dueAt
+    ) {
+    }
+
+    public record UpdateHomeworkRequest(
+            @NotBlank String title,
+            String description,
+            @NotNull Long classId,
+            String status,
+            ScoreVisibilityMode scoreVisibilityMode,
+            String attachmentPath,
+            OffsetDateTime startAt,
+            OffsetDateTime dueAt
+    ) {
+    }
+
+    public record ChangeHomeworkStatusRequest(
+            @NotBlank String status
+    ) {
+    }
+
+    public record SubmitHomeworkRequest(
+            String answerText,
+            String attachment,
+            String attachmentPath,
+            @Valid List<SubmitHomeworkAnswerItem> answers
+    ) {
+        public SubmitHomeworkRequest(List<SubmitHomeworkAnswerItem> answers) {
+            this(null, null, null, answers);
+        }
+
+        public SubmitHomeworkRequest(String answerText, String attachment, String attachmentPath) {
+            this(answerText, attachment, attachmentPath, List.of());
+        }
+
+        public String resolvedAttachmentPath() {
+            if (attachmentPath != null && !attachmentPath.isBlank()) {
+                return attachmentPath;
+            }
+            return attachment;
+        }
+
+        public boolean questionBased() {
+            return answers != null && !answers.isEmpty();
+        }
+    }
+
+    public static final class AddHomeworkQuestionFromBankRequest {
+        @NotNull
+        private Long questionId;
+
+        @NotNull
+        private Integer sortOrder;
+
+        @NotNull
+        private Double questionScore;
+
+        public AddHomeworkQuestionFromBankRequest() {
+        }
+
+        public AddHomeworkQuestionFromBankRequest(Long questionId, Integer sortOrder, Double questionScore) {
+            this.questionId = questionId;
+            this.sortOrder = sortOrder;
+            this.questionScore = questionScore;
+        }
+
+        public Long getQuestionId() {
+            return questionId;
+        }
+
+        public void setQuestionId(Long questionId) {
+            this.questionId = questionId;
+        }
+
+        public Integer getSortOrder() {
+            return sortOrder;
+        }
+
+        public void setSortOrder(Integer sortOrder) {
+            this.sortOrder = sortOrder;
+        }
+
+        public Double getQuestionScore() {
+            return questionScore;
+        }
+
+        public void setQuestionScore(Double questionScore) {
+            this.questionScore = questionScore;
+        }
+    }
+
+    public record AddInlineHomeworkQuestionRequest(
+            @NotBlank String type,
+            @NotBlank String stem,
+            @NotNull Double questionScore,
+            String scoringConfigJson,
+            boolean saveToQuestionBank,
+            @NotNull Integer sortOrder
+    ) {
+    }
+
+    public record SubmitHomeworkAnswerItem(
+            @NotNull Long homeworkQuestionId,
+            List<String> selectedOptions,
+            String answerText,
+            String answerJson,
+            String attachmentPath
+    ) {
+    }
+
+    public record GradeHomeworkRequest(
+            @NotNull Double totalScore,
+            String teacherComment
+    ) {
+    }
+
+    public record GradeHomeworkAnswerRequest(
+            Double score,
+            String teacherComment,
+            boolean acceptSuggested
+    ) {
+    }
+}

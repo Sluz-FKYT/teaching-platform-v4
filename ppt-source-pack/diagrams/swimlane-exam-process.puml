@@ -1,0 +1,48 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #f8fafc
+  BorderColor #475569
+  ArrowColor #334155
+}
+
+title 考试闭环泳道图
+
+|教师|
+start
+:创建考试;
+:配置试题;
+:发布考试;
+
+|学生|
+:查看考试列表;
+:开始考试;
+
+|系统|
+:创建 exam_submission;
+:计算 deadlineAt;
+:返回倒计时与考试详情;
+
+|学生|
+:答题;
+:交卷;
+
+|系统|
+:保存 exam_answer;
+:自动评分客观题;
+:更新提交状态;
+
+|教师|
+:查看考试结果列表;
+:打开提交详情;
+:评分主观题;
+
+|系统|
+:确认总分;
+:写入 score_record;
+
+|学生|
+:查看考试结果与得分明细;
+stop
+@enduml

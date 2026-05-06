@@ -1,0 +1,31 @@
+# student views knowledge
+
+## OVERVIEW
+
+学生端页面以任务闭环、截止时间、进度反馈为中心，必须和教师端管理视角分开。
+
+## WHERE TO LOOK
+
+| 任务 | 位置 | 说明 |
+|---|---|---|
+| 学生工作台 | `Dashboard.vue` | 当前任务、截止时间、主入口 |
+| 资料页 | `Materials.vue` | 资源获取与下载 |
+| 实验列表/作答 | `Labs.vue` `LabDetail.vue` `labs/List.vue` `labs/Detail.vue` | 新旧实现并存 |
+| 作业列表/提交 | `Homeworks.vue` `HomeworkDetail.vue` `homeworks/List.vue` `homeworks/Detail.vue` | 任务型页面 |
+| 考试列表/作答 | `exams/List.vue` `exams/Detail.vue` | 时间压力 + 提交语义 |
+| 成绩总览 | `Scores.vue` | 反馈与结果汇总 |
+
+## CONVENTIONS
+
+- 学生页优先表达：当前任务、截止时间、进度、主操作入口、结果反馈。
+- 主编辑区/答题区必须优先可读性，不要让视觉装饰压过输入和反馈。
+- 页面成功动作同样使用即时反馈；提交、保存、交卷后要有清晰确认。
+- 学生页面常直接依赖 `@/api/student` 或领域 API；契约变化时优先先看 API 与类型文件。
+- 页面重构时先对齐原型里的任务路径和状态表达，再调视觉细节。
+
+## ANTI-PATTERNS
+
+- 不要把学生页做成教师管理页那种高密度控制台。
+- 不要把主要操作埋进次级区域或过多弹窗。
+- 不要因为追求“质感”让提交流程变绕。
+- 不要弱化截止时间、提交状态、得分/反馈这些核心信息。

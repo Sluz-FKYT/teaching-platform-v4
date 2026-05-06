@@ -1,0 +1,127 @@
+# 13 数据库、界面展示与总结页正式文案
+
+本文件用于沉淀数据库设计、核心 ER 图、界面展示与完成度、总结四页的正式 PPT 文案，便于后续直接制作幻灯片或作为 `ppt-master` 输入。
+
+---
+
+## 第 1 页：数据库设计总览
+
+### 页标题
+
+数据库设计总览
+
+### 上屏文案
+
+- 数据库结构以 **migration 脚本** 为事实真源
+- 数据模型围绕 **用户组织、教学资源、实验、作业、考试、统计** 五组展开
+- 采用 **一类业务一套主表 + 明细表** 的建模方式
+- `score_record` 与 `plagiarism_task` 负责横切能力支撑
+
+### 配图建议
+
+- 主图：后续可补数据库工具的表结构截图或字段摘要图
+- 辅助图：可局部放 `exports/er-core-domain.png`
+
+### 证据路径
+
+- `backend/src/main/resources/db/migration/V1__init_schema.sql`
+- `backend/src/main/resources/db/migration/V2__seed_data.sql`
+- `backend/src/main/resources/db/migration/V3__profile_and_dashboard_contracts.sql`
+- `backend/src/main/resources/db/migration/V4__question_bank_teacher_scope.sql`
+- `backend/src/main/resources/db/migration/V5__qa_pending_grade_samples.sql`
+- `docs/03-database-design.md`
+
+### 备注讲稿
+
+数据库不是围绕单一页面零散设计的，而是围绕完整教学闭环来组织。整体上可以分成五组：用户与组织、教学资源、实验闭环、作业闭环、考试闭环，以及统计与查重这类横切能力。实验、作业和考试三条业务线都采用“主表 + 明细表 + 提交表 + 答案表”的结构组织，这说明系统在建模时没有为了省表而粗暴合并业务语义。与此同时，`score_record` 和 `plagiarism_task` 这类横切表让后续统计分析与查重流程有了稳定的数据支撑。
+
+---
+
+## 第 2 页：核心 ER 图
+
+### 页标题
+
+核心 ER 图
+
+### 上屏文案
+
+- 用户与班级关系构成教学组织基础
+- 实验、作业、考试三条闭环共享“任务—提交—得分”主线
+- 统计分析与查重建立在真实业务数据之上
+
+### 配图建议
+
+- 主图：`exports/er-core-domain.png`
+- 建议 ER 图尽量占大版面，右侧只保留 3 条解释文字
+
+### 证据路径
+
+- `exports/er-core-domain.png`
+- `backend/src/main/resources/db/migration/V1__init_schema.sql`
+- `docs/03-database-design.md`
+
+### 备注讲稿
+
+这张 ER 图重点不是把所有字段堆上去，而是说明系统的数据主线。首先，`sys_user`、`class_room` 和 `class_member` 共同构成用户与班级组织关系。其次，实验、作业和考试都形成了“任务定义—学生提交—答案记录—成绩沉淀”的闭环结构。最后，统计分析和查重并不是独立悬空存在的，它们是建立在真实提交记录和成绩记录之上的，因此整个系统的数据模型具备较强的一致性与可追踪性。
+
+---
+
+## 第 3 页：界面展示与完成度
+
+### 页标题
+
+界面展示与完成度
+
+### 上屏文案
+
+- 已覆盖登录、教师端、学生端、实验、作业、考试、分析等核心页面
+- 当前展示图以 **占位图 / 原型图 / 已有截图** 为主，后续可替换为最新实现截图
+- 系统已具备真实前后端、真实数据库、真实权限与真实业务闭环基础
+
+### 配图建议
+
+- 登录页占位：`design/screenshots/refined-login.png`
+- 教师工作台：`design/screenshots/main-teacher-dashboard.png`
+- 学生工作台：`design/screenshots/refined-student-dashboard.png`
+- 实验作答：`design/screenshots/missing-student-lab-detail-answer.png`
+- 考试作答：`design/screenshots/main-student-exam-taking-page.png`
+- 教师分析：`design/screenshots/main-teacher-analytics.png`
+
+### 证据路径
+
+- `docs/08-ui-placeholder-notes.md`
+- `design/02-screen-evidence-index.md`
+- `design/03-screen-to-route-contract.md`
+- `design/frontend-implementation-guide.md`
+
+### 备注讲稿
+
+这一页主要用于展示系统当前已经覆盖到的界面范围和实现进度。现阶段的截图有一部分来自设计目录和原型占位，它们的作用是帮助说明页面结构与业务流程，而不是替代真实实现证据。结合当前前后端和数据库实现，可以说系统已经具备登录、角色分流、实验、作业、考试、统计分析等核心闭环能力。后续如果补入新的运行截图或录屏，只需要替换这一页的图片素材即可，不会影响整体 PPT 结构。
+
+---
+
+## 第 4 页：总结
+
+### 页标题
+
+总结
+
+### 上屏文案
+
+- 系统已形成真实前后端、真实数据库、真实权限和真实分析闭环
+- 软件体系结构设计直接服务于多角色、多业务闭环和教学反馈需求
+- 当前素材包已支持后续继续生成正式 PPT 与答辩讲稿
+
+### 配图建议
+
+- 可用浅色背景图或简洁封底图，不必放高密度技术图
+
+### 证据路径
+
+- `docs/01-project-overview.md`
+- `docs/02-system-architecture.md`
+- `docs/12-architecture-and-pattern-pages.md`
+
+### 备注讲稿
+
+整体来看，这个项目并不是单纯地做几个页面和几张表，而是围绕真实教学业务组织出了一套较完整的系统。它在访问形态上体现为 B/S 应用，在工程实现上采用前后端分离，在后端内部又采用模块化单体加分层架构来控制复杂度。权限、答题、统计分析这些关键模块说明，系统设计已经能够支撑多角色协作、业务闭环跟踪和教学反馈。后续只要继续补充更完整的截图、录屏和个别代码证据图，就可以进一步打磨成正式答辩用 PPT。

@@ -1,0 +1,39 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #f8fafc
+  BorderColor #475569
+  ArrowColor #334155
+}
+
+title 作业闭环泳道图
+
+|教师|
+start
+:创建作业;
+:发布作业;
+
+|学生|
+:查看作业列表;
+:打开作业详情;
+:填写答案或上传内容;
+:提交作业;
+
+|系统|
+:写入 homework_submission;
+:生成或更新 plagiarism_task;
+
+|教师|
+:查看提交列表;
+:打开提交详情;
+:批改并填写反馈;
+
+|系统|
+:更新提交状态与得分;
+:写入 score_record;
+
+|学生|
+:查看作业反馈与成绩;
+stop
+@enduml

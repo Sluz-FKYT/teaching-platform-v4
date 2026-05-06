@@ -1,0 +1,26 @@
+# frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# backend
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# runtime
+data/
+uploads/
+logs/
+*.log
+
+# ide
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# os
+.DS_Store
+Thumbs.db
+
+# worktrees
+.worktrees/

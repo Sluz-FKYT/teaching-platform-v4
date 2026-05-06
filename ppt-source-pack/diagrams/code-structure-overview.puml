@@ -1,0 +1,76 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam ArrowColor #334155
+skinparam packageBorderColor #64748b
+skinparam packageBackgroundColor #f8fafc
+
+title 代码结构总览图（可后续替换为 IDE 截图）
+
+package "frontend/src" {
+  package "router" {
+    [index.ts] as front_router
+  }
+  package "stores" {
+    [auth.ts] as front_store_auth
+  }
+  package "api" {
+    [auth.ts] as front_api_auth
+    [labs.ts] as front_api_labs
+    [homeworks.ts] as front_api_homeworks
+    [exams.ts] as front_api_exams
+    [teacher.ts] as front_api_teacher
+    [student.ts] as front_api_student
+  }
+  package "views" {
+    [teacher/*] as front_views_teacher
+    [student/*] as front_views_student
+    [auth/Login.vue] as front_login
+    [common/Profile.vue] as front_profile
+  }
+  [utils/request.ts] as front_request
+}
+
+package "backend/src/main/java/com/opencode/teachingplatform" {
+  package "auth" {
+    [controller] as back_auth_controller
+    [service] as back_auth_service
+    [security] as back_auth_security
+  }
+  package "common" {
+    [api] as back_common_api
+    [exception] as back_common_exception
+  }
+  package "lab" {
+    [controller] as back_lab_controller
+    [service] as back_lab_service
+    [repository] as back_lab_repository
+    [entity] as back_lab_entity
+  }
+  package "homework" {
+    [controller] as back_homework_controller
+    [service] as back_homework_service
+    [entity] as back_homework_entity
+  }
+  package "exam" {
+    [controller] as back_exam_controller
+    [service] as back_exam_service
+    [entity] as back_exam_entity
+  }
+  package "analysis" {
+    [controller] as back_analysis_controller
+    [service] as back_analysis_service
+  }
+}
+
+front_router --> front_store_auth
+front_store_auth --> front_request
+front_views_teacher --> front_api_teacher
+front_views_student --> front_api_student
+front_api_auth --> back_auth_controller
+front_api_labs --> back_lab_controller
+front_api_homeworks --> back_homework_controller
+front_api_exams --> back_exam_controller
+
+@enduml

@@ -1,0 +1,50 @@
+services:
+  mysql:
+    image: mysql:8.2
+    container_name: teaching-platform-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: teaching_platform
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: teaching-platform-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: teaching_platform
+      DB_USER: root
+      DB_PASS: 123456
+      JWT_SECRET: replace-with-32-char-secret-1234
+      FILE_STORAGE_ROOT: /app/data/files
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    volumes:
+      - file-storage:/app/data/files
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: teaching-platform-frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080/api/v1
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
+  file-storage:

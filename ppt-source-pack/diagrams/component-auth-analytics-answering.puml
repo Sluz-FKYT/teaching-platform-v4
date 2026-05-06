@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+
+title 关键模块关系图：权限、答题、分析
+
+package "前端页面" {
+  component "登录 / Profile" as UIAuth
+  component "学生实验 / 作业 / 考试页面" as UIAnswer
+  component "教师 Dashboard / Analysis\n学生 Dashboard / Scores" as UIAnalytics
+}
+
+package "后端控制器" {
+  component "AuthController" as CAuth
+  component "LabController\nHomeworkController\nExamController" as CAnswer
+  component "AnalysisController" as CAnalytics
+}
+
+package "后端服务" {
+  component "AuthService" as SAuth
+  component "LabService\nHomeworkService\nExamService" as SAnswer
+  component "AnalysisService" as SAnalytics
+}
+
+database "核心表\nsys_user / *submission / *answer / score_record" as CoreDB
+
+UIAuth --> CAuth
+UIAnswer --> CAnswer
+UIAnalytics --> CAnalytics
+
+CAuth --> SAuth
+CAnswer --> SAnswer
+CAnalytics --> SAnalytics
+
+SAuth --> CoreDB
+SAnswer --> CoreDB
+SAnalytics --> CoreDB
+
+SAnswer --> SAnalytics : 成绩与状态沉淀
+SAuth --> SAnswer : 当前用户与角色边界
+
+@enduml
